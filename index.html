@@ -1,0 +1,463 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#5A48B5"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Estêncil"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Estêncil · prévia de tatuagem</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#E8E9ED;--sf:#fff;--fg:#1E2530;--mut:#6B7280;--ln:#D8DAE0;--ac:#5A48B5;--acs:#EEEBFA;--r:14px;font-family:"Bricolage Grotesque",system-ui,-apple-system,sans-serif}
+@media (prefers-color-scheme:dark){:root{--bg:#14161B;--sf:#1F222A;--fg:#ECEDF1;--mut:#9AA0AD;--ln:#2E323C;--ac:#A194FF;--acs:#2A2745}}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);display:flex;flex-direction:column;height:100dvh;padding-top:env(safe-area-inset-top,0px);overflow:hidden}
+header{display:flex;align-items:center;gap:8px;padding:10px 14px}
+.logo{font-weight:700;font-size:20px;letter-spacing:-.02em;margin-right:auto}
+.logo i{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--ac);margin-left:3px}
+.btn,button,select,input[type=text]{font:inherit;font-size:14px;color:var(--fg);background:var(--sf);border:1px solid var(--ln);border-radius:10px;padding:8px 12px;cursor:pointer;transition:background .15s,border-color .15s}
+.btn.main{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
+button:hover,.btn:hover{border-color:var(--ac)}button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+#wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:6px 14px;position:relative;overflow:hidden}
+#stage{position:relative;width:fit-content;max-width:100%;touch-action:none;overflow:hidden;user-select:none;-webkit-user-select:none;display:none;isolation:isolate;border-radius:var(--r);box-shadow:0 1px 2px rgba(0,0,0,.08),0 8px 30px rgba(30,37,48,.12)}
+#photo{display:block;max-width:100%;width:auto;height:auto}
+.t{position:absolute;height:auto;touch-action:none;z-index:1}.t.sel{outline:calc(1.5px*var(--iz,1)) dashed var(--ac);outline-offset:3px}
+#gd{position:absolute;top:0;bottom:0;left:50%;width:0;z-index:6;border-left:calc(1.5px*var(--iz,1)) dashed var(--ac);display:none;pointer-events:none}#gd i{transform:scale(var(--iz,1));position:absolute;top:10px;left:-15px;width:30px;height:30px;border-radius:50%;background:var(--ac);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35);pointer-events:auto;touch-action:none;cursor:ew-resize}
+#panel.min .tabs,#panel.min .pane,#panel.min #res{display:none}.grab{display:flex;justify-content:center;margin:-4px 0 8px}.grab button{padding:3px 14px;font-size:12px;color:var(--mut);border-radius:99px}
+#ring{position:absolute;display:none;border:calc(2px*var(--iz,1)) dashed var(--ac);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:7}
+#zc{position:absolute;top:10px;right:20px;z-index:12;display:none;gap:2px;background:var(--sf);border:1px solid var(--ln);border-radius:99px;padding:3px;box-shadow:0 2px 8px rgba(0,0,0,.15)}#zc button{border:0;border-radius:99px;min-width:34px;padding:6px 9px;font-size:14px;background:transparent}
+.lbi{position:relative;width:62px;height:62px;padding:0!important;background:#fff!important;overflow:hidden}.lbi img{width:100%;height:100%;object-fit:contain}.lbi b{position:absolute;top:0;right:0;font-size:12px;background:var(--sf);color:var(--fg);padding:0 6px;border-radius:0 0 0 8px}
+#stage.hide .t,#stage.hide #mesh{visibility:hidden}
+#mesh{position:absolute;display:none;pointer-events:none;z-index:5}#mesh.on{display:block}
+.hd{display:none;position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:#fff;border:2.5px solid var(--ac);box-shadow:0 1px 4px rgba(0,0,0,.35);pointer-events:auto;touch-action:none;cursor:grab}
+#empty{width:100%;max-width:420px;text-align:center;border:1.5px dashed var(--ln);border-radius:20px;padding:36px 24px;background:var(--sf)}
+#empty h2{margin:0 0 6px;font-size:22px;letter-spacing:-.02em}#empty p{margin:0 0 20px;color:var(--mut);font-size:15px;line-height:1.45}
+#hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:var(--fg);color:var(--bg);font-size:13px;padding:8px 14px;border-radius:99px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center}
+#hint.show{opacity:1}
+#panel{background:var(--sf);border-radius:22px 22px 0 0;box-shadow:0 -6px 24px rgba(30,37,48,.1);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));max-height:38dvh;position:relative;z-index:10;flex:none;overflow-y:auto;width:100%;max-width:520px;align-self:center}
+.tools{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px}.tools button{white-space:nowrap;padding:7px 11px;font-size:13px}
+.tabs{display:flex;background:var(--bg);border-radius:10px;padding:3px;margin-bottom:8px}
+.tab{flex:1;border:0;background:transparent;border-radius:8px;padding:7px 0;font-size:14px;color:var(--mut)}.tab.on{background:var(--sf);color:var(--fg);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.pane label{display:flex;align-items:center;gap:10px;font-size:14px;margin:9px 0}.pane label span{width:92px;flex:none}
+input[type=range]{flex:1;accent-color:var(--ac);height:28px}input[type=checkbox]{accent-color:var(--ac);width:20px;height:20px}
+input[type=color]{width:44px;height:30px;border:1px solid var(--ln);border-radius:8px;padding:0;background:none}
+small{color:var(--mut);font-size:12px}
+details{position:relative}summary{list-style:none;cursor:pointer}summary::-webkit-details-marker{display:none}
+.menu{position:absolute;right:0;top:44px;z-index:5;background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:12px;width:290px;box-shadow:0 12px 36px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:8px}
+.menu .r{display:flex;gap:6px}.menu .r>*{flex:1;min-width:0}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+#res{margin-top:10px;text-align:center}#ov{position:fixed;inset:0;z-index:30;background:var(--bg);display:none;flex-direction:column;align-items:center;gap:10px;padding:calc(12px + env(safe-area-inset-top,0px)) 14px calc(12px + env(safe-area-inset-bottom,0px))}.ovb{display:flex;gap:8px;width:100%;max-width:520px}.ovb button:first-child{flex:1}#out{max-width:100%;max-height:calc(100dvh - 150px);object-fit:contain;border-radius:12px;min-height:0}#outp{font-size:13px;color:var(--mut);margin:0}#outp a{color:var(--ac)}
+#cam{display:none;max-width:100%;width:auto;height:auto;pointer-events:none}#rf{position:absolute;display:none;z-index:6;pointer-events:none;width:22px;height:22px;margin:-11px 0 0 -11px;border:2px solid #e5484d;border-radius:50%;transform:scale(var(--iz,1))}#rf:after{content:'';position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;background:#e5484d;border-radius:50%}
+#cb{position:absolute;bottom:46px;left:50%;transform:translateX(-50%);z-index:12;display:none;gap:8px;align-items:center}#cb button{padding:10px 16px;border-radius:99px;box-shadow:0 2px 8px rgba(0,0,0,.2)}#cb .main{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600;padding:12px 22px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<header><span class="logo">Estêncil<i></i></span>
+<label class="btn" for="fPhoto">Foto</label><label class="btn main" for="fTat">+ Tatuagem</label>
+<details><summary class="btn">Projetos</summary><div class="menu">
+<input id="pn" type="text" placeholder="Nome do projeto"><button id="bSave">Salvar projeto</button>
+<div class="r"><select id="ps"></select></div><div class="r"><button id="bLoad">Abrir</button><button id="bDelP">Apagar</button></div><hr style="border:0;border-top:1px solid var(--ln);width:100%;margin:2px 0"><button id="bLib">Salvar tatuagem na biblioteca</button><div id="lib" style="display:flex;flex-wrap:wrap;gap:6px;max-height:150px;overflow:auto"></div></div></details></header>
+<input id="fPhoto" class="vh" type="file" accept="image/*"><input id="fTat" class="vh" type="file" accept="image/*">
+<div id="wrap">
+<div id="empty"><h2>Veja a tatuagem antes de fazer</h2><p>Escolha uma foto sua e depois o desenho. Você move, gira e ajusta até ficar do jeito certo.</p>
+<label class="btn main" for="fPhoto">Escolher foto</label><button class="btn" id="bCam" style="margin-left:8px">Usar câmera</button></div>
+<div id="stage"><img id="photo" draggable="false" alt="Sua foto"><video id="cam" playsinline muted autoplay></video><div id="rf"></div><div id="ring"></div><div id="gd"><i></i></div><div id="mesh"></div></div>
+<div id="zc"><button id="zn">Mover</button><button id="zm">−</button><button id="zp">100%</button><button id="zpl">+</button></div><div id="cb"><button id="cbx">Fechar</button><button id="cbs" class="main">Capturar</button><button id="cbf">Virar</button></div><div id="hint" role="status"></div></div>
+<div id="panel" style="display:none">
+<div class="grab"><button id="pt">Ocultar ajustes</button></div>
+<div class="tools"><button id="bCam2">Câmera</button><button id="bUn">Desfazer</button><button id="bRe">Refazer</button><button id="bMir">Espelhar</button><button id="bFr">Para frente</button><button id="bBk">Para trás</button><button id="bGd">Guia</button><button id="bCt">Centralizar</button><button id="bDup">Duplicar espelhada</button><button id="bCr">Recortar</button><button id="bEr">Borracha</button><button id="bRs">Restaurar</button><button id="bAu">Relevo auto</button><button id="bGr">Grade</button><button id="bMesh">Malha</button><button id="bMR">Redefinir malha</button><button id="bBA">Segure: antes</button><button id="bDel">Remover</button></div>
+<div class="tabs"><button class="tab on" data-t="a">Posição</button><button class="tab" data-t="b">Pele</button><button class="tab" data-t="c">Tinta</button><button class="tab" data-t="d">Tamanho</button></div>
+<div class="pane" id="p-a"><small>Um dedo move. Dois dedos: pinça muda o tamanho, giro muda a rotação.</small>
+<div class="row"><select id="vs" style="flex:1"><option value="0">Variação A</option><option value="1">Variação B</option><option value="2">Variação C</option></select><button id="vSave">Gravar</button><button id="vLoad">Abrir</button></div>
+<div class="row"><button id="bCol">Colagem das variações</button></div>
+<label><span>Tamanho</span><input id="sz" type="range" min="3" max="80" step="0.5"></label>
+<label><span>Rotação</span><input id="rt" type="range" min="-380" max="380" step="1"></label>
+<label><span>Envolver</span><input id="wp" type="range" min="0" max="100" step="1" value="0"></label>
+<label><span>Largura</span><input id="sx" type="range" min="30" max="160" step="1"></label>
+<label><span>Altura</span><input id="sy" type="range" min="30" max="160" step="1"></label>
+<label><span>Alcance malha</span><input id="mr" type="range" min="8" max="60" step="1" value="25"></label>
+<label><span>Relevo auto</span><input id="ai" type="range" min="-100" max="100" step="1" value="0"></label>
+<label><span>Curvatura</span><input id="bd" type="range" min="-100" max="100" step="1"></label></div>
+<div class="pane" id="p-b" hidden>
+<label><span>Luz da pele</span><input id="lt" type="range" min="0" max="100" step="1" value="0"></label>
+<div class="row"><button id="bFo">Foco automático</button></div>
+<label><span>Tempo</span><input id="yr" type="range" min="0" max="10" step="0.5" value="0"><small id="yrl">hoje</small></label>
+<div class="row"><button class="yb" data-y="0">Hoje</button><button class="yb" data-y="1">1 ano</button><button class="yb" data-y="5">5 anos</button><button class="yb" data-y="10">10 anos</button></div>
+<label><span>Recém-feita</span><input id="hl" type="range" min="0" max="100" step="1" value="0"></label>
+<label><span>Opacidade</span><input id="op" type="range" min="20" max="100" step="1"></label>
+<label><span>Desfoque</span><input id="bl" type="range" min="0" max="4" step="0.1"></label>
+<label><span>Cicatrização</span><input id="ag" type="range" min="0" max="100" step="1"></label>
+<label><span>Mesclar</span><input id="mx" type="checkbox"><small>a pele sombreia a tinta</small></label></div>
+<div class="pane" id="p-c" hidden>
+<label><span>Tons</span><input id="tn" type="range" min="0" max="100" step="1" value="50"></label>
+<label><span>Traço</span><input id="th" type="range" min="-100" max="100" step="1" value="0"></label>
+<label><span>Só contorno</span><input id="ot" type="checkbox"><small>apenas as bordas das áreas</small></label>
+<label><span>Cor</span><input id="co" type="color" value="#2a2f2e"></label>
+<label><span>Limpar fundo</span><input id="se" type="range" min="0" max="100" step="1"></label>
+<label><span>Pincel</span><input id="br" type="range" min="2" max="25" step="1" value="8"></label>
+<label><span>Extrair da pele</span><input id="sk" type="checkbox"><small>tatuagem em foto de corpo</small></label>
+<label><span>Cores originais</span><input id="kc" type="checkbox"><small>para desenhos coloridos</small></label>
+<label><span>Inverter</span><input id="iv" type="checkbox"><small>desenho claro em fundo escuro</small></label></div>
+<div class="pane" id="p-d" hidden><label><span>Largura (cm)</span><input id="cm" type="number" min="1" max="200" step="0.5" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--ln);background:transparent;color:var(--fg)"></label>
+<small id="cmi">Informe a largura real da tatuagem selecionada para calibrar a escala.</small>
+<label><span>Espelhado</span><input id="stm" type="checkbox"><small>para papel de decalque</small></label>
+<div class="row"><button id="bSt">Exportar estêncil (300 dpi)</button><button id="bCard">Cartão do tatuador</button></div>
+<div class="row"><button id="bVi">Verificar viabilidade</button></div><small id="vi"></small>
+<label><span>Referência</span><input id="rfn" type="text" placeholder="ex.: nuca" style="flex:1;min-width:0"><button id="bRf">Marcar</button><button id="bRc">Limpar</button></label><small id="rfi"></small></div>
+<div id="res"><button class="btn main" id="bExp">Gerar imagem final</button></div>
+</div>
+<div id="ov"><div class="ovb"><button id="ovx">← Voltar à edição</button><button id="ovba">Ver antes</button><button id="ovsb">Lado a lado</button></div><img id="out" alt="Resultado"><p id="outp"><a id="dl" download="tatuagem.jpg">Baixar imagem</a> · ou segure o dedo sobre ela para salvar.</p></div>
+<script>
+var $=function(i){return document.getElementById(i)},stage=$('stage'),photo=$('photo'),T=[],sel=null,pts={},drag=null,dp=null,gest=null,moved=false,U=[],ui=-1;
+var curYr=0,PK=['wp','hl','yr','th','ot','lt','tn','ai','kc','sk','emd','mesh','x','y','sz','r','b','op','se','co','iv','m','sx','sy','bd','ag','mx'];
+function read(f,cb){var r=new FileReader();r.onload=function(){cb(r.result)};r.readAsDataURL(f)}
+$('fPhoto').onchange=function(e){var f=e.target.files[0];if(f)read(f,function(u){var im=new Image();im.onload=function(){var s=Math.min(1,2000/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);setPhoto(c.toDataURL('image/jpeg',.92),auto)};im.onerror=function(){setPhoto(u,auto)};im.src=u});e.target.value=''};
+$('fTat').onchange=function(e){var f=e.target.files[0];if(f)read(f,function(u){var im=new Image();im.onload=function(){addTat(im)};im.src=u});e.target.value=''};
+var photoVer=0;function setPhoto(u,cb){if(camS)camStop();photoVer++;photo.onload=function(){stage.style.display='block';$('empty').style.display='none';$('zc').style.display='flex';vz=1;vx=vy=0;vap();$('hint').textContent='Agora adicione uma tatuagem.';if(cb)cb()};photo.src=u}
+function addTat(im,p,nopush){
+ if(stage.style.display!=='block'){$('hint').textContent='Escolha a foto primeiro.';return}
+ var s=Math.min(1,800/Math.max(im.width,im.height)),w=Math.round(im.width*s),h=Math.round(im.height*s),pad=Math.round(h*.17),padx=Math.round(w*.17);
+ var c=document.createElement('canvas');c.width=w+2*padx;c.height=h+2*pad;c.className='t';
+ var oc=document.createElement('canvas');oc.width=w;oc.height=h;var x=oc.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);
+ var src=oc.toDataURL('image/jpeg',.88),d=x.getImageData(0,0,w,h).data,lum=new Float32Array(w*h);
+ var rgb=new Uint8Array(w*h*3);for(var i=0;i<w*h;i++){lum[i]=.3*d[i*4]+.59*d[i*4+1]+.11*d[i*4+2];rgb[i*3]=d[i*4];rgb[i*3+1]=d[i*4+1];rgb[i*3+2]=d[i*4+2]}
+ var bgc=[0,0,0],cn=0;[[0,0],[w-6,0],[0,h-6],[w-6,h-6]].forEach(function(c){for(var y=c[1];y<c[1]+6;y++)for(var x=c[0];x<c[0]+6;x++){var q=(y*w+x)*4;bgc[0]+=d[q];bgc[1]+=d[q+1];bgc[2]+=d[q+2];cn++}});bgc=bgc.map(function(v){return v/cn});
+ var o={c:c,em:Object.assign(document.createElement('canvas'),{width:c.width,height:c.height}),emd:'',wp:0,hl:0,yr:0,th:0,ot:false,lt:0,sh:null,tn:50,ai:0,am:null,sk:false,kc:false,rgb:rgb,bgc:bgc,oc:oc,lum:lum,w:w,h:h,pad:pad,padx:padx,src:src,x:50,y:50,sz:25,r:0,b:0.3,op:90,se:50,co:'#2a2f2e',iv:false,m:false,sx:100,sy:100,bd:0,ag:0,mx:true,mesh:ZM()};
+ if(p)for(var k in p)if(PK.indexOf(k)>=0)o[k]=p[k];
+ if(o.mesh.length===9)o.mesh=mig(o.mesh);else if(o.mesh.length===25&&MN!==5)o.mesh=rs(o.mesh,5);
+ if(!p){var bl=.3*bgc[0]+.59*bgc[1]+.11*bgc[2],msg='';
+  if(bl<110){o.iv=true;msg='Fundo escuro detectado: ativei Inverter.'}
+  var cs=0,ccn=0,tot=0;for(var ii=0;ii<w*h;ii+=5){tot++;var q=ii*4,dr=d[q]-bgc[0],dg=d[q+1]-bgc[1],db=d[q+2]-bgc[2];if(dr*dr+dg*dg+db*db>3600){ccn++;cs+=Math.max(d[q],d[q+1],d[q+2])-Math.min(d[q],d[q+1],d[q+2])}}
+  if(ccn>tot*.01&&cs/ccn>55){o.kc=true;msg='Desenho colorido detectado: ativei Cores originais.'}
+  var cm=[[0,0],[w-6,0],[0,h-6],[w-6,h-6]].map(function(c){var s2=0;for(var y=c[1];y<c[1]+6;y++)for(var x=c[0];x<c[0]+6;x++){var q=(y*w+x)*4;s2+=.3*d[q]+.59*d[q+1]+.11*d[q+2]}return s2/36});
+  if(Math.max.apply(0,cm)-Math.min.apply(0,cm)>35){o.sk=true;msg=msg||'Fundo irregular detectado: ativei Extrair da pele.'}
+  o.ai=50;o.lt=30;o.yr=curYr;if(msg)setTimeout(function(){$('hint').textContent=msg},60)}
+ T.push(o);c.onpointerdown=function(){pick(o)};stage.appendChild(c);render(o);if(o.emd)loadMask(o,function(){render(o)});pick(o);$('panel').style.display='block';$('hint').textContent='';if(!nopush)push()}
+var PM=null;
+function photoSAT(){if(PM&&PM.v===photoVer)return PM;var W=400,H=Math.max(1,Math.round(W*photo.naturalHeight/photo.naturalWidth)),c=document.createElement('canvas');c.width=W;c.height=H;var x=c.getContext('2d');x.drawImage(photo,0,0,W,H);
+ var d=x.getImageData(0,0,W,H).data,S=new Float64Array((W+1)*(H+1)),LL=new Float32Array(W*H);for(var j=1;j<=H;j++){var row=0;for(var i=1;i<=W;i++){var q=((j-1)*W+(i-1))*4;var lv=.3*d[q]+.59*d[q+1]+.11*d[q+2];row+=lv;LL[(j-1)*W+(i-1)]=lv;S[j*(W+1)+i]=S[(j-1)*(W+1)+i]+row}}
+ PM={v:photoVer,W:W,H:H,S:S,L:LL};return PM}
+function wm(P,x0,y0,x1,y1){x0=Math.max(0,Math.min(P.W,x0));x1=Math.max(0,Math.min(P.W,x1));y0=Math.max(0,Math.min(P.H,y0));y1=Math.max(0,Math.min(P.H,y1));var a=(x1-x0)*(y1-y0);if(a<1)return 128;var W1=P.W+1,S=P.S;
+ var xa=Math.floor(x0),xb=Math.ceil(x1),ya=Math.floor(y0),yb=Math.ceil(y1);return (S[yb*W1+xb]-S[ya*W1+xb]-S[yb*W1+xa]+S[ya*W1+xa])/((xb-xa)*(yb-ya))}
+function calcAuto(o){var R=stage.getBoundingClientRect(),Z=[],n;for(n=0;n<MN*MN;n++)Z.push([0,0]);if(!R.width||!photo.naturalWidth)return Z;
+ var P=photoSAT(),r=o.r*Math.PI/180,cs=Math.cos(r),sn=Math.sin(r),mx=(o.m?-1:1)*o.sx/100,my=o.sy/100,f=R.width*o.sz/100,kk=f/o.w,d=Math.max(2,f/(MN-1)*P.W/R.width),mg=0;
+ for(n=0;n<MN*MN;n++){var u=(n%MN)/(MN-1),v=Math.floor(n/MN)/(MN-1),lx=(o.padx+WU(o,u)*o.w-o.c.width/2)*kk*mx,ly=(o.pad+v*o.h-o.c.height/2)*kk*my,
+  X=(o.x/100*R.width+lx*cs-ly*sn)*P.W/R.width,Y=(o.y/100*R.height+lx*sn+ly*cs)*P.H/R.height,
+  gx=(wm(P,X,Y-d/2,X+d,Y+d/2)-wm(P,X-d,Y-d/2,X,Y+d/2))/255,gy=(wm(P,X-d/2,Y,X+d/2,Y+d)-wm(P,X-d/2,Y-d,X+d/2,Y))/255,
+  ux=(gx*cs+gy*sn)/mx,uy=(-gx*sn+gy*cs)/my;Z[n]=[ux,uy];mg=Math.max(mg,Math.hypot(ux,uy))}
+ if(mg<1e-5)return Z.map(function(){return[0,0]});var s=.12/mg;return Z.map(function(e){return[e[0]*s,e[1]*s]})}
+function shadeMap(o){var G=24,s=document.createElement('canvas');s.width=s.height=G;var R=stage.getBoundingClientRect();if(!R.width||!photo.naturalWidth)return s;
+ var P=photoSAT(),r=o.r*Math.PI/180,cs=Math.cos(r),sn=Math.sin(r),mx=(o.m?-1:1)*o.sx/100,my=o.sy/100,kk=R.width*o.sz/100/o.w,d=Math.max(2,kk*o.c.width/G*P.W/R.width),V=[],m=0,i;
+ for(i=0;i<G*G;i++){var cx=((i%G)+.5)/G*o.c.width,cy=(Math.floor(i/G)+.5)/G*o.c.height,lx=(cx-o.c.width/2)*kk*mx,ly=(cy-o.c.height/2)*kk*my,
+  X=(o.x/100*R.width+lx*cs-ly*sn)*P.W/R.width,Y=(o.y/100*R.height+lx*sn+ly*cs)*P.H/R.height,L=wm(P,X-d/2,Y-d/2,X+d/2,Y+d/2);V.push(L);m+=L}
+ m/=V.length;var mg=1;V.forEach(function(v){mg=Math.max(mg,Math.abs(v-m))});
+ var x=s.getContext('2d'),im=x.createImageData(G,G);V.forEach(function(v,i){var t=(v-m)/mg,p=i*4,c=t>0?255:0;im.data[p]=im.data[p+1]=im.data[p+2]=c;im.data[p+3]=Math.abs(t)*115});x.putImageData(im,0,0);return s}
+function sharpEst(){var P=photoSAT(),L=P.L,W=P.W,H=P.H,s=0,n=0;for(var y=0;y<H-1;y+=2)for(var x=0;x<W-1;x+=2){var i=y*W+x;s+=Math.abs(L[i+1]-L[i])+Math.abs(L[i+W]-L[i]);n+=2}return s/n}
+function render(o){if(o.ai)o.am=calcAuto(o);if(o.lt)o.sh=shadeMap(o);
+ var l=o.lum,n=o.w*o.h,s=[],i;for(i=0;i<n;i+=7)s.push(o.iv?255-l[i]:l[i]);s.sort(function(p,q){return p-q});var bg=s[Math.floor(s.length*.92)];
+ var k=.1+(100-o.se)/100*.7,col=parseInt(o.co.slice(1),16),R=col>>16,G=(col>>8)&255,B=col&255,ag=o.ag/100;if(o.yr&&!o.kc){var ys=o.yr/10*.5;R+=(70-R)*ys;G+=(82-G)*ys;B+=(96-B)*ys}
+ var ctx=o.oc.getContext('2d'),im=ctx.createImageData(o.w,o.h),p=im.data,W=o.w,A=new Float32Array(o.w*o.h);
+ if(o.sk&&!o.loc)o.loc=locBg(o);var tg=Math.pow(2,(o.tn-50)/50),kc=o.kc,lo=10+(100-o.se)*.5,hi=lo+70;
+ for(i=0;i<n;i++){var b0=o.sk&&o.loc?o.loc[i]:bg,v=o.iv?255-l[i]:l[i],al=(b0-v-b0*.06)/(b0*k+1);al=al<0?0:al>1?1:al;
+  if(kc){var q3=i*3,dr=o.rgb[q3]-o.bgc[0],dg=o.rgb[q3+1]-o.bgc[1],db=o.rgb[q3+2]-o.bgc[2];al=(Math.sqrt(dr*dr+dg*dg+db*db)-lo)/(hi-lo);al=al<0?0:al>1?1:al}
+  if(tg!==1)al=Math.pow(al,tg);
+  if(ag){var xx=(i%W)>>1,yy=(i/W|0)>>1,z=Math.sin(xx*12.9898+yy*78.233)*43758.5453;z-=Math.floor(z);al*=1-ag*(.55*z+.2)}
+  p[i*4]=kc?o.rgb[i*3]:R;p[i*4+1]=kc?o.rgb[i*3+1]:G;p[i*4+2]=kc?o.rgb[i*3+2]:B;A[i]=al}
+ if(o.th||o.ot||o.yr)postA(o,A);for(i=0;i<n;i++)p[i*4+3]=A[i]*255;
+ ctx.putImageData(im,0,0);draw(o);place(o)}
+function L(t){return[2*(t-.5)*(t-1),-4*t*(t-1),2*t*(t-.5)]}
+var MN=7;function ZM(){var a=[];for(var i=0;i<MN*MN;i++)a.push([0,0]);return a}
+function mig(m){var r=[];for(var j=0;j<MN;j++)for(var i=0;i<MN;i++){var a=L(i/(MN-1)),b=L(j/(MN-1)),dx=0,dy=0;for(var q=0;q<3;q++)for(var s=0;s<3;s++){var e=m[q*3+s],kk=a[s]*b[q];dx+=e[0]*kk;dy+=e[1]*kk}r.push([dx,dy])}return r}
+function cr(t,a,b,c,d){return .5*(2*b+(-a+c)*t+(2*a-5*b+4*c-d)*t*t+(-a+3*b-3*c+d)*t*t*t)}
+function fld2(m,n,u,v,k){var gu=u*(n-1),gv=v*(n-1),i=Math.min(n-2,Math.floor(gu)),j=Math.min(n-2,Math.floor(gv)),tu=gu-i,tv=gv-j,r=[];
+ function P(a,b){a=Math.max(0,Math.min(n-1,a));b=Math.max(0,Math.min(n-1,b));return m[b*n+a][k]}
+ for(var dj=-1;dj<=2;dj++)r.push(cr(tu,P(i-1,j+dj),P(i,j+dj),P(i+1,j+dj),P(i+2,j+dj)));return cr(tv,r[0],r[1],r[2],r[3])}
+function fld(o,u,v,k){var a=fld2(o.mesh,MN,u,v,k);return o.ai&&o.am?a+fld2(o.am,MN,u,v,k)*o.ai/100:a}
+function rs(m,n){var r=[];for(var j=0;j<MN;j++)for(var i=0;i<MN;i++)r.push([fld2(m,n,i/(MN-1),j/(MN-1),0),fld2(m,n,i/(MN-1),j/(MN-1),1)]);return r}
+function vtx(o,u,v){return[o.padx+WU(o,u)*o.w+fld(o,u,v,0)*o.w,o.pad+v*o.h+fld(o,u,v,1)*o.h+o.bd/100*o.pad*(2*u*u-1)]}
+function tri(c,im,s,d){var x0=s[0][0],y0=s[0][1],x1=s[1][0],y1=s[1][1],x2=s[2][0],y2=s[2][1],u0=d[0][0],v0=d[0][1],u1=d[1][0],v1=d[1][1],u2=d[2][0],v2=d[2][1],
+ dt=(x1-x0)*(y2-y0)-(x2-x0)*(y1-y0),a=((u1-u0)*(y2-y0)-(u2-u0)*(y1-y0))/dt,b=((v1-v0)*(y2-y0)-(v2-v0)*(y1-y0))/dt,cc=((x1-x0)*(u2-u0)-(x2-x0)*(u1-u0))/dt,dd=((x1-x0)*(v2-v0)-(x2-x0)*(v1-v0))/dt;
+ var gx=(u0+u1+u2)/3,gy=(v0+v1+v2)/3;c.save();c.beginPath();d.forEach(function(p,n){var dx=p[0]-gx,dy=p[1]-gy,l=Math.hypot(dx,dy)||1,X=p[0]+dx/l*.7,Y=p[1]+dy/l*.7;n?c.lineTo(X,Y):c.moveTo(X,Y)});c.closePath();c.clip();
+ c.setTransform(a,b,cc,dd,u0-a*x0-cc*y0,v0-b*x0-dd*y0);c.drawImage(im,0,0);c.restore()}
+function locBg(o){var f=8,w=o.w,h=o.h,gw=Math.ceil(w/f),gh=Math.ceil(h/f),g=new Float32Array(gw*gh),i,j,x,y;
+ for(j=0;j<gh;j++)for(i=0;i<gw;i++){var s=0,n=0;for(y=j*f;y<Math.min(h,j*f+f);y+=2)for(x=i*f;x<Math.min(w,i*f+f);x+=2){s+=o.lum[y*w+x];n++}g[j*gw+i]=s/n}
+ function flt(a,mx){var b=new Float32Array(a.length);for(var j=0;j<gh;j++)for(var i=0;i<gw;i++){var v=mx?-1:0,c=0;for(var dj=-2;dj<=2;dj++)for(var di=-2;di<=2;di++){var jj=j+dj,ii=i+di;if(jj<0||jj>=gh||ii<0||ii>=gw)continue;var t=a[jj*gw+ii];if(mx){if(t>v)v=t}else{v+=t;c++}}b[j*gw+i]=mx?v:v/c}return b}
+ g=flt(flt(flt(g,1),0),0);var L=new Float32Array(w*h);
+ for(y=0;y<h;y++)for(x=0;x<w;x++){var fx=Math.min(gw-1.001,Math.max(0,x/f-.5)),fy=Math.min(gh-1.001,Math.max(0,y/f-.5)),i0=fx|0,j0=fy|0,ax=fx-i0,ay=fy-j0,k0=j0*gw+i0;
+  L[y*w+x]=(g[k0]*(1-ax)+g[k0+1]*ax)*(1-ay)+(g[k0+gw]*(1-ax)+g[k0+gw+1]*ax)*ay}
+ return L}
+function draw(o){var c=o.c.getContext('2d'),N=10,G=[],i,j;c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,o.c.width,o.c.height);
+ for(j=0;j<=N;j++){G[j]=[];for(i=0;i<=N;i++)G[j][i]=vtx(o,i/N,j/N)}
+ for(j=0;j<N;j++)for(i=0;i<N;i++){var s=function(a,b){return[a/N*o.w,b/N*o.h]},A=s(i,j),B=s(i+1,j),C=s(i,j+1),D=s(i+1,j+1);
+  tri(c,o.oc,[A,B,C],[G[j][i],G[j][i+1],G[j+1][i]]);tri(c,o.oc,[B,D,C],[G[j][i+1],G[j+1][i+1],G[j+1][i]])}
+ c.globalCompositeOperation='destination-out';c.drawImage(o.em,0,0);c.globalCompositeOperation='source-over';
+ if(o.lt&&o.sh){c.globalCompositeOperation='source-atop';c.globalAlpha=o.lt/100;c.drawImage(o.sh,0,0,o.c.width,o.c.height);c.globalAlpha=1;c.globalCompositeOperation='source-over'}
+ if(o.wp){var a2=1-.6*o.wp/100,g=c.createLinearGradient(o.padx,0,o.padx+o.w,0);g.addColorStop(0,'rgba(0,0,0,'+a2+')');g.addColorStop(.3,'rgba(0,0,0,1)');g.addColorStop(.7,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,'+a2+')');c.globalCompositeOperation='destination-in';c.fillStyle=g;c.fillRect(0,0,o.c.width,o.c.height);c.globalCompositeOperation='source-over'}
+ if(o.hl){var s2=document.createElement('canvas');s2.width=o.c.width;s2.height=o.c.height;s2.getContext('2d').drawImage(o.c,0,0);var q=o.hl/100,off=o.c.width*3;c.save();c.globalCompositeOperation='destination-over';c.shadowColor='rgba(205,45,50,'+(.7*q)+')';c.shadowBlur=Math.max(8,o.c.width*.04);c.shadowOffsetX=off;c.drawImage(s2,-off,0);c.shadowBlur=Math.max(4,o.c.width*.015);c.shadowColor='rgba(190,30,35,'+(.5*q)+')';c.drawImage(s2,-off,0);c.restore()}}
+function place(o){var c=o.c;c.style.left=o.x+'%';c.style.top=o.y+'%';c.style.width=(o.sz*o.c.width/o.w)+'%';
+ c.style.transform='translate(-50%,-50%) rotate('+o.r+'deg) scale('+(o.m?-1:1)*o.sx/100+','+o.sy/100+')';
+ updCm();c.style.opacity=o.op/100;c.style.filter='blur('+(o.b+o.ag/100*1.2)+'px)';c.style.mixBlendMode=o.mx?'multiply':'normal';if(o===sel)updMesh()}
+function pick(o){sel=o;T.forEach(function(t){t.c.classList.toggle('sel',t===o)});
+ var m={wp:'wp',hl:'hl',th:'th',yr:'yr',sz:'sz',rt:'r',sx:'sx',sy:'sy',bd:'bd',ag:'ag',bl:'b',op:'op',se:'se',co:'co'};for(var k in m)$(k).value=o[m[k]];$('iv').checked=o.iv;$('sk').checked=o.sk;$('kc').checked=o.kc;$('ai').value=o.ai;$('lt').value=o.lt;updCm();$('tn').value=o.tn;$('mx').checked=o.mx;$('ot').checked=o.ot;$('yrl').textContent=yl(o.yr);rfInfo();updMesh()}
+// histórico
+function snap(){return T.map(function(o){var p={};PK.forEach(function(k){p[k]=JSON.parse(JSON.stringify(o[k]))});return{o:o,p:p}})}
+var resU='',at;function auto(){clearTimeout(at);at=setTimeout(autoNow,500)}function autoNow(){if(stage.style.display!=='block')return;try{localStorage.setItem('auto:last',JSON.stringify(pack()))}catch(e){}}
+function push(){if(sel&&(sel.ai||sel.lt)){if(sel.ai)sel.am=calcAuto(sel);if(sel.lt)sel.sh=shadeMap(sel);draw(sel);updMesh()}
+ U=U.slice(0,ui+1);U.push(snap());if(U.length>40)U.shift();ui=U.length-1;auto()}
+function restore(st,cb){T.forEach(function(o){o.c.remove()});var n=st.length;T=st.map(function(e){for(var k in e.p)e.o[k]=JSON.parse(JSON.stringify(e.p[k]));stage.appendChild(e.o.c);loadMask(e.o,function(){render(e.o);if(--n===0&&cb)setTimeout(cb,20)});return e.o});sel=T.length?T[T.length-1]:null;if(sel)pick(sel);if(!n&&cb)setTimeout(cb,20)}
+$('bUn').onclick=function(){if(ui>0){ui--;restore(U[ui])}};$('bRe').onclick=function(){if(ui<U.length-1){ui++;restore(U[ui])}};
+// gestos
+var view=false,lastTap=0,lastPos=[0,0];
+stage.addEventListener('pointerdown',function(e){
+ if(refMode){setRef(e);e.preventDefault();return}
+ try{stage.setPointerCapture(e.pointerId)}catch(_){}
+ var tg=!!(e.target.classList&&e.target.classList.contains('t'));np[e.pointerId]={x:e.clientX,y:e.clientY,t:tg};var ids=Object.keys(np),nn=ids.length;
+ if(nn>=2){var all=ids.every(function(k){return np[k].t});
+  if(!navOn&&!meshOn&&!crOn&&!erOn&&sel&&all&&nn===2){drag=null;var a=np[ids[0]],b=np[ids[1]];gest={d:Math.hypot(b.x-a.x,b.y-a.y)||1,a:Math.atan2(b.y-a.y,b.x-a.x),sz:sel.sz,r:sel.r}}
+  else{view=true;er=null;crA=null;drag=null;gest=null;if(pull){pull=null;$('ring').style.display='none'}}
+  e.preventDefault();return}
+ if(navOn){view=true;e.preventDefault();return}
+ if(meshOn&&sel){startPull(e);e.preventDefault();return}
+ if(crOn&&sel){crA=toC(sel,e);var m=document.createElement('canvas');m.width=sel.em.width;m.height=sel.em.height;m.getContext('2d').drawImage(sel.em,0,0);sel._m0=m;e.preventDefault();return}
+ if(erOn&&sel){er=toC(sel,e);stroke(sel,er,er);e.preventDefault();return}
+ moved=false;
+ if(tg&&sel){drag=sel;dp={x:e.clientX,y:e.clientY,ox:sel.x,oy:sel.y}}
+ else{view=true;var t=Date.now();if(t-lastTap<300&&Math.hypot(e.clientX-lastPos[0],e.clientY-lastPos[1])<30){if(vz>1.3){vz=1;vx=vy=0;vap()}else zoomAt(e.clientX,e.clientY,2.5);lastTap=0}else{lastTap=t;lastPos=[e.clientX,e.clientY]}}
+ e.preventDefault()});
+stage.addEventListener('pointermove',function(e){
+ if(view){vNavMove(e);return}
+ var q0=np[e.pointerId];if(q0){q0.x=e.clientX;q0.y=e.clientY}
+ if(pull){movePull(e);return}
+ if(crA&&sel){crect(sel,crA,toC(sel,e));return}
+ if(er&&sel){var n=toC(sel,e);stroke(sel,er,n);er=n;return}
+ var ids=Object.keys(np);
+ if(gest&&ids.length>=2&&sel){var a=np[ids[0]],b=np[ids[1]];moved=true;
+  sel.sz=Math.max(3,Math.min(80,gest.sz*Math.hypot(b.x-a.x,b.y-a.y)/gest.d));
+  sel.r=Math.max(-380,Math.min(380,gest.r+(Math.atan2(b.y-a.y,b.x-a.x)-gest.a)*180/Math.PI));place(sel);pick(sel)}
+ else if(drag){moved=true;var r=stage.getBoundingClientRect();drag.x=dp.ox+(e.clientX-dp.x)/r.width*100;drag.y=dp.oy+(e.clientY-dp.y)/r.height*100;place(drag)}});
+function up(e){delete np[e.pointerId];var n=Object.keys(np).length;
+ if(view){if(!n)view=false;return}
+ if(pull){endPull();return}
+ if(crA){crA=null;sel.emd=sel.em.toDataURL();push();return}
+ if(er){er=null;sel.emd=sel.em.toDataURL();push();return}
+ if(n<2)gest=null;if(!n){drag=null;if(moved){moved=false;push()}}}
+window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);
+var rq=0;function rr(o){if(o._q)return;o._q=requestAnimationFrame(function(){o._q=0;render(o)})}
+function bind(id,key,re){$(id).oninput=function(){if(!sel)return;var e=$(id);sel[key]=e.type==='checkbox'?e.checked:e.type==='color'?e.value:+e.value;re?rr(sel):place(sel)};$(id).onchange=push}
+bind('sz','sz');bind('rt','r');bind('sx','sx');bind('sy','sy');bind('bl','b');bind('op','op');bind('ag','ag',1);bind('se','se',1);bind('co','co',1);bind('iv','iv',1);bind('sk','sk',1);bind('kc','kc',1);bind('tn','tn',1);bind('mx','mx');
+$('bd').oninput=function(){if(sel){sel.bd=+$('bd').value;draw(sel);updMesh()}};$('bd').onchange=push;
+$('bMir').onclick=function(){if(sel){sel.m=!sel.m;place(sel);push()}};
+$('bDel').onclick=function(){if(!sel)return;sel.c.remove();T.splice(T.indexOf(sel),1);sel=T.length?T[T.length-1]:null;if(sel)pick(sel);push()};
+function mv(d){if(!sel)return;var i=T.indexOf(sel),j=i+d;if(j<0||j>=T.length)return;T.splice(i,1);T.splice(j,0,sel);T.forEach(function(o){stage.appendChild(o.c)});push()}
+$('bFr').onclick=function(){mv(1)};$('bBk').onclick=function(){mv(-1)};
+var ba=$('bBA');function hide(v){return function(e){stage.classList.toggle('hide',v);e.preventDefault()}}
+ba.onpointerdown=hide(true);['pointerup','pointerleave','pointercancel'].forEach(function(ev){ba.addEventListener(ev,hide(false))});
+// projetos
+function plist(){var s=$('ps');s.innerHTML='';try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k.indexOf('tp:')===0){var op=document.createElement('option');op.value=k;op.textContent=k.slice(3);s.appendChild(op)}}}catch(e){}
+ if(!s.options.length){var o2=document.createElement('option');o2.textContent='Nenhum projeto salvo';o2.value='';s.appendChild(o2)}}
+function pack(){var W=photo.naturalWidth,sc=Math.min(1,1000/W),c=document.createElement('canvas');c.width=Math.round(W*sc);c.height=Math.round(photo.naturalHeight*sc);c.getContext('2d').drawImage(photo,0,0,c.width,c.height);
+ return{rf:ref,cm:cmPer,v:V.map(function(v){return v&&v.map(function(e){return{i:T.indexOf(e.o),p:e.p}})}),photo:c.toDataURL('image/jpeg',.78),t:T.map(function(o){var p={src:o.src};PK.forEach(function(k){p[k]=o[k]});return p})}}
+function openData(d,name){T.forEach(function(o){o.c.remove()});T=[];sel=null;U=[];ui=-1;cmPer=d.cm||0;ref=d.rf||null;showRef();
+ setPhoto(d.photo,function(){if(!d.t.length)$('panel').style.display='none';
+  (function nx(k){if(k>=d.t.length){V=(d.v||[null,null,null]).map(function(v){return v&&v.map(function(e){return{o:T[e.i],p:e.p}}).filter(function(e){return e.o})});push();return}
+   var im=new Image();im.onload=function(){addTat(im,d.t[k],1);nx(k+1)};im.src=d.t[k].src})(0);if(name)$('pn').value=name})}
+$('bSave').onclick=function(){var n=$('pn').value.trim();if(!n||stage.style.display!=='block'){$('hint').textContent='Escolha a foto e dê um nome ao projeto.';return}
+ try{localStorage.setItem('tp:'+n,JSON.stringify(pack()));$('hint').textContent='Projeto "'+n+'" salvo neste navegador.';plist();$('ps').value='tp:'+n}catch(e){$('hint').textContent='Não consegui salvar (armazenamento cheio ou bloqueado).'}};
+$('bLoad').onclick=function(){var k=$('ps').value;if(!k)return;var d;try{d=JSON.parse(localStorage.getItem(k))}catch(e){return}openData(d,k.slice(3))};
+$('bDelP').onclick=function(){var k=$('ps').value;if(!k)return;try{localStorage.removeItem(k)}catch(e){}plist()};
+plist();
+$('ovsb').onclick=function(){var im=new Image();im.onload=function(){var W=photo.naturalWidth,H=photo.naturalHeight,c=document.createElement('canvas');c.width=W*2+20;c.height=H;var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,H);x.drawImage(photo,0,0,W,H);x.drawImage(im,W+20,0,W,H);$('out').src=c.toDataURL('image/jpeg',.9);$('ovba').textContent='Ver antes'};im.src=resU};
+$('ovx').onclick=function(){$('ov').style.display='none'};$('ovba').onclick=function(){var a=$('ovba').textContent==='Ver antes';$('out').src=a?photo.src:resU;$('ovba').textContent=a?'Ver depois':'Ver antes'};
+document.addEventListener('visibilitychange',function(){if(document.hidden)autoNow()});window.addEventListener('pagehide',autoNow);
+try{var a0=localStorage.getItem('auto:last');if(a0)openData(JSON.parse(a0))}catch(e){}
+
+document.querySelectorAll('.tab').forEach(function(b){b.onclick=function(){document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('on',x===b)});document.querySelectorAll('.pane').forEach(function(p){p.hidden=p.id!=='p-'+b.dataset.t})}});
+
+var meshOn=false,mEl=$('mesh'),HD=[];
+for(var q=0;q<MN*MN;q++)(function(q){var e=document.createElement('div');e.className='hd';mEl.appendChild(e);HD.push(e);
+ e.addEventListener('pointerdown',function(ev){ev.stopPropagation();ev.preventDefault();if(!sel)return;e.setPointerCapture(ev.pointerId);e._d={x:ev.clientX,y:ev.clientY,m:sel.mesh[q].slice()}});
+ e.addEventListener('pointermove',function(ev){var d=e._d;if(!d||!sel)return;var o=sel,r=o.r*Math.PI/180,dx=ev.clientX-d.x,dy=ev.clientY-d.y,
+  ux=(dx*Math.cos(r)+dy*Math.sin(r))/((o.m?-1:1)*o.sx/100),uy=(-dx*Math.sin(r)+dy*Math.cos(r))/(o.sy/100),f=stage.getBoundingClientRect().width*o.sz/100;
+  o.mesh[q]=[d.m[0]+ux/f,d.m[1]+uy*o.w/(f*o.h)];draw(o);updMesh()});
+ var end=function(){if(e._d){e._d=null;push()}};e.addEventListener('pointerup',end);e.addEventListener('pointercancel',end)})(q);
+var NS='http://www.w3.org/2000/svg',svg=document.createElementNS(NS,'svg'),PL=[];
+svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('preserveAspectRatio','none');svg.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none';
+for(var q2=0;q2<MN*2;q2++){var pl=document.createElementNS(NS,'polyline');pl.setAttribute('fill','none');pl.setAttribute('stroke','#7b68ee');pl.setAttribute('stroke-width','1.5');pl.setAttribute('stroke-opacity','.75');pl.setAttribute('vector-effect','non-scaling-stroke');svg.appendChild(pl);PL.push(pl)}
+mEl.insertBefore(svg,mEl.firstChild);
+function updMesh(){if(!meshOn||!sel){mEl.classList.remove('on');return}var o=sel,s=mEl.style;mEl.classList.add('on');
+ svg.style.display=gridOn?'block':'none';s.left=o.x+'%';s.top=o.y+'%';s.width=(o.sz*o.c.width/o.w)+'%';s.aspectRatio=o.c.width+'/'+o.c.height;
+ s.transform='translate(-50%,-50%) rotate('+o.r+'deg) scale('+(o.m?-1:1)*o.sx/100+','+o.sy/100+')';
+ var P=[];HD.forEach(function(e,n){var p=vtx(o,(n%MN)/(MN-1),Math.floor(n/MN)/(MN-1)),X=p[0]/o.c.width*100,Y=p[1]/o.c.height*100;P.push(X+','+Y);e.style.left=X+'%';e.style.top=Y+'%'});
+ for(var a=0;a<MN;a++){var r=[],c=[];for(var b=0;b<MN;b++){r.push(P[a*MN+b]);c.push(P[b*MN+a])}PL[a].setAttribute('points',r.join(' '));PL[MN+a].setAttribute('points',c.join(' '))}}
+$('bMesh').onclick=function(){meshOn=!meshOn;$('bMesh').style.background=meshOn?'var(--acs)':'';$('bMesh').style.borderColor=meshOn?'var(--ac)':'';if(meshOn)$('hint').textContent='Arraste sobre a tatuagem para empurrar ou puxar. Ajuste o Alcance.';updMesh()};
+$('bMR').onclick=function(){if(!sel)return;sel.mesh=ZM();draw(sel);updMesh();push()};
+
+var crOn=false,crA=null,erOn=false,rsOn=false,er=null,raf=0;
+function loadMask(o,cb){var x=o.em.getContext('2d');x.clearRect(0,0,o.em.width,o.em.height);if(!o.emd){cb();return}var im=new Image();im.onload=function(){x.drawImage(im,0,0);cb()};im.src=o.emd}
+function toC(o,e){var R=stage.getBoundingClientRect(),r=o.r*Math.PI/180,dx=e.clientX-(R.left+o.x/100*R.width),dy=e.clientY-(R.top+o.y/100*R.height),
+ ux=(dx*Math.cos(r)+dy*Math.sin(r))/((o.m?-1:1)*o.sx/100),uy=(-dx*Math.sin(r)+dy*Math.cos(r))/(o.sy/100),k=100/(R.width*o.sz/100)*(o.c.width/o.c.width)*o.w/o.w;
+ k=o.w/(R.width*o.sz/100);return[o.c.width/2+ux*k,o.c.height/2+uy*k]}
+function stroke(o,a,b){var x=o.em.getContext('2d');x.globalCompositeOperation=rsOn?'destination-out':'source-over';x.strokeStyle='#000';x.lineCap='round';x.lineWidth=o.c.width*(+$('br').value)/100;
+ x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0]+.01,b[1]);x.stroke();if(!raf)raf=requestAnimationFrame(function(){raf=0;draw(o)})}
+function tog(b,v){$(b).style.background=v?'var(--acs)':'';$(b).style.borderColor=v?'var(--ac)':''}
+$('bEr').onclick=function(){crOn=false;tog('bCr',false);erOn=!erOn;rsOn=false;tog('bEr',erOn);tog('bRs',false);if(erOn)$('hint').textContent='Passe o dedo sobre o que quer apagar.'};
+$('bRs').onclick=function(){crOn=false;tog('bCr',false);rsOn=!rsOn;erOn=rsOn;tog('bRs',rsOn);tog('bEr',false);if(rsOn)$('hint').textContent='Passe o dedo para trazer de volta o que apagou.'};
+function crect(o,a,b){var x=o.em.getContext('2d'),W=o.em.width,H=o.em.height,l=Math.min(a[0],b[0]),r=Math.max(a[0],b[0]),t=Math.min(a[1],b[1]),d=Math.max(a[1],b[1]);
+ x.globalCompositeOperation='source-over';x.clearRect(0,0,W,H);x.drawImage(o._m0,0,0);x.fillStyle='#000';x.fillRect(0,0,W,t);x.fillRect(0,d,W,H-d);x.fillRect(0,t,l,d-t);x.fillRect(r,t,W-r,d-t);
+ if(!raf)raf=requestAnimationFrame(function(){raf=0;draw(o)})}
+$('bCr').onclick=function(){crOn=!crOn;erOn=false;rsOn=false;tog('bCr',crOn);tog('bEr',false);tog('bRs',false);if(crOn)$('hint').textContent='Arraste para marcar a área da tatuagem. O resto é apagado.'};
+var gdX=50,gd=$('gd'),gdOn=false,gi=gd.querySelector('i');
+$('bGd').onclick=function(){gdOn=!gdOn;gd.style.display=gdOn?'block':'none';tog('bGd',gdOn);if(gdOn)$('hint').textContent='Arraste a bolinha até a coluna. Centralizar alinha a tatuagem à guia.'};
+gi.addEventListener('pointerdown',function(e){e.stopPropagation();e.preventDefault();gi.setPointerCapture(e.pointerId);gi._d=1});
+gi.addEventListener('pointermove',function(e){if(!gi._d)return;var r=stage.getBoundingClientRect();gdX=Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100));gd.style.left=gdX+'%'});
+gi.addEventListener('pointerup',function(){gi._d=0});
+$('bCt').onclick=function(){if(sel){sel.x=gdX;place(sel);push()}};
+$('bDup').onclick=function(){if(!sel)return;var p={src:sel.src};PK.forEach(function(k){p[k]=JSON.parse(JSON.stringify(sel[k]))});p.m=!sel.m;p.r=-sel.r;p.x=Math.max(0,Math.min(100,2*gdX-sel.x));var im=new Image();im.onload=function(){addTat(im,p)};im.src=sel.src};
+function fit(){var w=$('wrap'),mh=Math.max(120,w.clientHeight-12)+'px',mw=(w.clientWidth-28)+'px';['photo','cam'].forEach(function(id){var p=$(id);p.style.maxHeight=mh;p.style.maxWidth=mw})}
+if(window.ResizeObserver)new ResizeObserver(fit).observe($('wrap'));window.addEventListener('resize',fit);fit();
+$('pt').onclick=function(){var m=$('panel').classList.toggle('min');this.textContent=m?'Mostrar ajustes':'Ocultar ajustes';fit()};
+var pull=null,gridOn=false;
+function ring(e){var R=$('ring').style,st=stage.getBoundingClientRect(),o=sel,d=$('mr').value/100*o.c.width*(st.width*o.sz/(100*o.w));R.display='block';R.width=R.height=(d/vz)+'px';R.left=((e.clientX-st.left)/vz)+'px';R.top=((e.clientY-st.top)/vz)+'px'}
+function startPull(e){var o=sel,c0=toC(o,e),R=$('mr').value/100*o.c.width*.5,w=[],i;
+ for(i=0;i<MN*MN;i++){var p=vtx(o,(i%MN)/(MN-1),Math.floor(i/MN)/(MN-1)),dx=p[0]-c0[0],dy=p[1]-c0[1];w.push(Math.exp(-(dx*dx+dy*dy)/(2*R*R)))}
+ pull={c0:c0,w:w,m0:JSON.parse(JSON.stringify(o.mesh))};ring(e)}
+function movePull(e){var o=sel,c=toC(o,e),dx=(c[0]-pull.c0[0])/o.w,dy=(c[1]-pull.c0[1])/o.h;
+ for(var i=0;i<MN*MN;i++)o.mesh[i]=[pull.m0[i][0]+pull.w[i]*dx,pull.m0[i][1]+pull.w[i]*dy];
+ if(!raf)raf=requestAnimationFrame(function(){raf=0;draw(o);updMesh()});ring(e)}
+function endPull(){pull=null;$('ring').style.display='none';push()}
+$('bGr').onclick=function(){gridOn=!gridOn;tog('bGr',gridOn);updMesh()};
+$('ai').oninput=function(){if(!sel)return;sel.ai=+$('ai').value;sel.am=calcAuto(sel);draw(sel);updMesh()};$('ai').onchange=push;
+$('bAu').onclick=function(){if(!sel)return;sel.ai=sel.ai?0:60;sel.am=sel.ai?calcAuto(sel):null;$('ai').value=sel.ai;draw(sel);updMesh();tog('bAu',!!sel.ai);if(sel.ai)$('hint').textContent='Relevo automático ligado. Ajuste a intensidade em Posição.';push()};
+var vz=1,vx=0,vy=0,navOn=false,np={},wr=$('wrap');
+function vap(){var sw=stage.offsetWidth,sh=stage.offsetHeight,mx=Math.max(0,(sw*vz-wr.clientWidth)/2),my=Math.max(0,(sh*vz-wr.clientHeight)/2);
+ vx=Math.max(-mx,Math.min(mx,vx));vy=Math.max(-my,Math.min(my,vy));stage.style.transform='translate('+vx+'px,'+vy+'px) scale('+vz+')';stage.style.setProperty('--iz',1/vz);$('zp').textContent=Math.round(vz*100)+'%'}
+function zoomAt(mx2,my2,nz){nz=Math.max(1,Math.min(6,nz));var r=wr.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,qx=(mx2-cx-vx)/vz,qy=(my2-cy-vy)/vz;vz=nz;vx=mx2-cx-nz*qx;vy=my2-cy-nz*qy;vap()}
+function wc(){var r=wr.getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2]}
+function vNavMove(e){var q=np[e.pointerId];if(!q)return;var ids=Object.keys(np),nx=e.clientX,ny=e.clientY;
+ if(ids.length>=2){var o2=np[ids[0]===String(e.pointerId)?ids[1]:ids[0]],d0=Math.hypot(q.x-o2.x,q.y-o2.y)||1,d1=Math.hypot(nx-o2.x,ny-o2.y);
+  vx+=(nx+o2.x)/2-(q.x+o2.x)/2;vy+=(ny+o2.y)/2-(q.y+o2.y)/2;q.x=nx;q.y=ny;zoomAt((nx+o2.x)/2,(ny+o2.y)/2,vz*d1/d0)}
+ else{vx+=nx-q.x;vy+=ny-q.y;q.x=nx;q.y=ny;vap()}}
+$('zn').onclick=function(){navOn=!navOn;np={};$('zn').style.background=navOn?'var(--acs)':'';if(navOn)$('hint').textContent='Modo mover: um dedo arrasta a foto, dois dedos dão zoom.'};
+$('zm').onclick=function(){var c=wc();zoomAt(c[0],c[1],vz/1.4)};$('zpl').onclick=function(){var c=wc();zoomAt(c[0],c[1],vz*1.4)};
+$('zp').onclick=function(){vz=1;vx=vy=0;vap()};
+wr.addEventListener('wheel',function(e){if(stage.style.display!=='block')return;e.preventDefault();zoomAt(e.clientX,e.clientY,vz*(e.deltaY<0?1.15:1/1.15))},{passive:false});
+window.addEventListener('resize',vap);
+var cmPer=cmPer||0,V=V||[null,null,null];
+function updCm(){var a=$('cm');if(!a)return;if(!cmPer){$('cmi').textContent='Informe a largura real da tatuagem selecionada para calibrar a escala.';return}
+ if(sel&&document.activeElement!==a)a.value=(sel.sz*sel.sx/100*cmPer).toFixed(1);
+ $('cmi').textContent=T.map(function(o,i){return 'Tatuagem '+(i+1)+': '+(o.sz*o.sx/100*cmPer).toFixed(1)+' cm'}).join(' · ')+' · a foto tem cerca de '+(100*cmPer).toFixed(0)+' cm de largura.';rfInfo()}
+$('cm').oninput=function(){var v=+$('cm').value;if(!sel||!(v>0))return;cmPer=v/(sel.sz*sel.sx/100);updCm()};$('cm').onchange=push;
+$('lt').oninput=function(){if(!sel)return;sel.lt=+$('lt').value;if(sel.lt)sel.sh=shadeMap(sel);draw(sel)};$('lt').onchange=push;
+$('bFo').onclick=function(){if(!sel)return;var b=Math.max(.2,Math.min(2,2-sharpEst()*.6));sel.b=+b.toFixed(1);pick(sel);place(sel);push();$('hint').textContent='Desfoque ajustado para '+sel.b+' (estimativa pela nitidez da foto).'};
+$('vSave').onclick=function(){var k=+$('vs').value;V[k]=snap();$('hint').textContent='Variação '+'ABC'[k]+' gravada.';auto()};
+$('vLoad').onclick=function(){var k=+$('vs').value;if(!V[k]){$('hint').textContent='A variação '+'ABC'[k]+' está vazia.';return}restore(V[k]);push()};
+function libList(){var a=[];try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k.indexOf('lib:')===0)a.push(k)}}catch(e){}return a.sort()}
+function libRender(){var L=$('lib');L.innerHTML='';libList().forEach(function(k){var d;try{d=JSON.parse(localStorage.getItem(k))}catch(e){return}var b=document.createElement('button'),im=document.createElement('img'),x=document.createElement('b');b.className='lbi';im.src=d.src;x.textContent='×';
+ x.onclick=function(ev){ev.stopPropagation();localStorage.removeItem(k);libRender()};b.appendChild(im);b.appendChild(x);b.onclick=function(){var i2=new Image();i2.onload=function(){addTat(i2,d.p)};i2.src=d.src};L.appendChild(b)})}
+$('bLib').onclick=function(){if(!sel)return;var p={ai:50,lt:30};['se','co','iv','sk','kc','tn'].forEach(function(k){p[k]=sel[k]});
+ try{localStorage.setItem('lib:'+Date.now(),JSON.stringify({src:sel.src,p:p}));$('hint').textContent='Tatuagem salva na biblioteca.';libRender()}catch(e){$('hint').textContent='Não consegui salvar (armazenamento cheio).'}};
+libRender();
+function say(t){$('hint').textContent=t}
+function fc(v){return v.toFixed(1).replace('.',',')}
+function yl(v){return v?(v==1?'1 ano':String(v).replace('.',',')+' anos'):'hoje'}
+// ---------- filtros de alfa (traço, contorno, envelhecimento) ----------
+function boxb(A,w,h,r){var T2=new Float32Array(A.length),x,y,s,n=2*r+1,o0;
+ for(y=0;y<h;y++){o0=y*w;s=0;for(x=-r;x<=r;x++)s+=A[o0+Math.min(w-1,Math.max(0,x))];
+  for(x=0;x<w;x++){T2[o0+x]=s/n;s+=A[o0+Math.min(w-1,x+r+1)]-A[o0+Math.max(0,x-r)]}}
+ for(x=0;x<w;x++){s=0;for(y=-r;y<=r;y++)s+=T2[Math.min(h-1,Math.max(0,y))*w+x];
+  for(y=0;y<h;y++){A[y*w+x]=s/n;s+=T2[Math.min(h-1,y+r+1)*w+x]-T2[Math.max(0,y-r)*w+x]}}}
+function morph(A,w,h,r,mx){var B=new Float32Array(A.length),x,y,d,v,t;
+ for(y=0;y<h;y++)for(x=0;x<w;x++){v=A[y*w+x];for(d=-r;d<=r;d++){var xx=x+d;if(xx<0||xx>=w)continue;t=A[y*w+xx];if(mx?t>v:t<v)v=t}B[y*w+x]=v}
+ for(x=0;x<w;x++)for(y=0;y<h;y++){v=B[y*w+x];for(d=-r;d<=r;d++){var yy=y+d;if(yy<0||yy>=h)continue;t=B[yy*w+x];if(mx?t>v:t<v)v=t}A[y*w+x]=v}}
+function postA(o,A){var w=o.w,h=o.h,n=A.length,i,v;
+ if(o.th){var r=Math.max(1,Math.round(Math.abs(o.th)/100*Math.max(2,w/250)));morph(A,w,h,r,o.th>0)}
+ if(o.ot){var E=Float32Array.from(A);morph(E,w,h,Math.max(1,Math.round(w/300)),false);for(i=0;i<n;i++){v=A[i]-E[i];A[i]=v<0?0:v}}
+ if(o.yr){var s=o.yr/10,r2=Math.max(1,Math.round(s*w/420)),B=Float32Array.from(A);boxb(B,w,h,r2);boxb(B,w,h,r2);var k=1+.7*s,f=1-.3*s;for(i=0;i<n;i++){v=B[i]*k;if(v>1)v=1;A[i]=v*f}}}
+// ---------- envolver membro ----------
+function WU(o,u){var t=(o.wp||0)*.026;return t<.02?u:.5+Math.sin((u-.5)*t)/(2*Math.sin(t/2))}
+// ---------- versão plana (sem simulações) para estêncil e medidas ----------
+function flat(o,fn){var s={wp:o.wp,hl:o.hl,yr:o.yr,ai:o.ai,lt:o.lt},r;o.wp=o.hl=o.yr=o.ai=o.lt=0;render(o);
+ try{r=fn()}finally{o.wp=s.wp;o.hl=s.hl;o.yr=s.yr;o.ai=s.ai;o.lt=s.lt;render(o)}return r}
+function stencilCanvas(o,mir,pxo){var cw=o.sz*o.sx/100*cmPer,px=pxo||Math.min(5000,cw/2.54*300),W=Math.max(1,Math.round(o.c.width*px/o.w)),H=Math.max(1,Math.round(o.c.height*px/o.w*o.sy/o.sx)),c=document.createElement('canvas');
+ c.width=W;c.height=H;var x=c.getContext('2d');x.imageSmoothingQuality='high';if(!!o.m!==!!mir){x.translate(W,0);x.scale(-1,1)}x.drawImage(o.c,0,0,W,H);x.setTransform(1,0,0,1,0,0);
+ x.globalCompositeOperation='source-in';x.fillStyle='#000';x.fillRect(0,0,W,H);return c}
+// ---------- verificador de viabilidade ----------
+function lineStats(o){return flat(o,function(){var w=o.w,h=o.h,n=w*h,d=o.oc.getContext('2d').getImageData(0,0,w,h).data,D=new Uint8Array(n),i,x,y,m;
+ for(i=0;i<n;i++)D[i]=d[i*4+3]>100?255:0;
+ for(y=0;y<h;y++)for(x=0;x<w;x++){i=y*w+x;if(!D[i])continue;m=Math.min(255,x>0?D[i-1]:0,y>0?D[i-w]:0,(x>0&&y>0)?D[i-w-1]:0,(x<w-1&&y>0)?D[i-w+1]:0);D[i]=Math.min(255,m+1)}
+ for(y=h-1;y>=0;y--)for(x=w-1;x>=0;x--){i=y*w+x;if(!D[i])continue;m=Math.min(x<w-1?D[i+1]:0,y<h-1?D[i+w]:0,(x<w-1&&y<h-1)?D[i+w+1]:0,(x>0&&y<h-1)?D[i+w-1]:0);D[i]=Math.min(D[i],m+1)}
+ var hist=new Uint32Array(256),tot=0;
+ for(y=1;y<h-1;y++)for(x=1;x<w-1;x++){i=y*w+x;var di=D[i];if(!di)continue;if(D[i-1]>di||D[i+1]>di||D[i-w]>di||D[i+w]>di||D[i-w-1]>di||D[i-w+1]>di||D[i+w-1]>di||D[i+w+1]>di)continue;hist[di]++;tot++}
+ function pc(q){var a=0;for(var k=1;k<256;k++){a+=hist[k];if(a>=tot*q)return k}return 1}
+ return{n:tot,d15:pc(.15),d50:pc(.5)}})}
+function viab(o){if(!cmPer)return{lvl:-1,txt:'Informe a largura em cm da tatuagem (aba Tamanho) para verificar.'};
+ var s=lineStats(o);if(s.n<20)return{lvl:-1,txt:'Não consegui medir as linhas deste desenho.'};
+ var cw=o.sz*o.sx/100*cmPer,mpp=cw*10/o.w,p=(2*s.d15-1)*mpp,m=(2*s.d50-1)*mpp,f=function(v){return v.toFixed(2).replace('.',',')};
+ if(p<.4)return{lvl:2,txt:'Linhas finas demais: as mais finas têm cerca de '+f(p)+' mm e tendem a borrar com o tempo. Aumente a largura para pelo menos '+Math.ceil(cw*.5/p)+' cm ou engrosse o traço.'};
+ if(p<.7)return{lvl:1,txt:'Atenção: as linhas mais finas têm cerca de '+f(p)+' mm. Exige tatuador experiente em traço fino e pode desbotar mais rápido.'};
+ return{lvl:0,txt:'Linhas de cerca de '+f(p)+' mm nas partes mais finas (típico: '+f(m)+' mm). Boa para tatuar.'}}
+// ---------- imagem composta ----------
+function compose(){var W=photo.naturalWidth,H=photo.naturalHeight,c=document.createElement('canvas');c.width=W;c.height=H;var x=c.getContext('2d');
+ x.drawImage(photo,0,0,W,H);var k=W/stage.offsetWidth;
+ T.forEach(function(o){var dw=W*o.sz/100*o.c.width/o.w,dh=dw*o.c.height/o.c.width;x.save();x.translate(W*o.x/100,H*o.y/100);x.rotate(o.r*Math.PI/180);x.scale((o.m?-1:1)*o.sx/100,o.sy/100);
+  x.globalAlpha=o.op/100;x.globalCompositeOperation=o.mx?'multiply':'source-over';try{x.filter='blur('+((o.b+o.ag/100*1.2)*k)+'px)'}catch(e){}x.drawImage(o.c,-dw/2,-dh/2,dw,dh);x.restore()});return c}
+function showOv(u,name,bg,cmp){resU=u;$('out').src=u;$('out').style.background=bg||'';$('dl').href=u;$('dl').download=name;$('ovba').style.display=$('ovsb').style.display=cmp?'':'none';$('ovba').textContent='Ver antes';$('ov').style.display='flex'}
+$('bExp').onclick=function(){if(camS||!photo.naturalWidth){say('Capture ou escolha a foto primeiro.');return}showOv(compose().toDataURL('image/jpeg',.93),'tatuagem.jpg','',true)};
+$('bSt').onclick=function(){var o=sel;if(!o||!cmPer){say('Informe a largura em cm primeiro.');return}
+ var c=flat(o,function(){return stencilCanvas(o,$('stm').checked)});showOv(c.toDataURL('image/png'),'estencil.png','#fff',false)};
+// ---------- referência de posição ----------
+var refMode=false,ref=ref||null;
+function showRef(){var e=$('rf');if(!ref){e.style.display='none';return}e.style.display='block';e.style.left=ref.x+'%';e.style.top=ref.y+'%'}
+function posRel(o){var dx=(o.x-ref.x)*cmPer,dy=(o.y-ref.y)*stage.offsetHeight/stage.offsetWidth*cmPer;
+ return fc(Math.abs(dx))+' cm para '+(dx>=0?'a direita':'a esquerda')+' e '+fc(Math.abs(dy))+' cm '+(dy>=0?'abaixo':'acima')+' de "'+ref.n+'" (conforme a foto)'}
+function rfInfo(){var e=$('rfi');if(!e)return;if(!ref){e.textContent='';return}if(!sel||!cmPer){e.textContent='Informe a largura em cm para ver as distâncias.';return}e.textContent='Centro da tatuagem: '+posRel(sel)}
+function setRef(e){var r=stage.getBoundingClientRect();ref={x:(e.clientX-r.left)/r.width*100,y:(e.clientY-r.top)/r.height*100,n:$('rfn').value.trim()||'referência'};refMode=false;showRef();rfInfo();push();say('Referência marcada.')}
+$('bRf').onclick=function(){refMode=true;say('Toque na foto no ponto de referência.')};
+$('bRc').onclick=function(){ref=null;showRef();rfInfo();push()};
+// ---------- cartão do tatuador ----------
+function wrapT(x,t,px,py,mw,lh){var words=t.split(' '),line='',y=py;words.forEach(function(w){var ts=line?line+' '+w:w;if(x.measureText(ts).width>mw&&line){x.fillText(line,px,y);y+=lh;line=w}else line=ts});x.fillText(line,px,y);return y+lh}
+$('bCard').onclick=function(){var o=sel;if(!o||!cmPer||camS||!photo.naturalWidth){say('Escolha a foto, selecione a tatuagem e informe a largura em cm.');return}
+ var W=1240,H=1754,c=document.createElement('canvas');c.width=W;c.height=H;var x=c.getContext('2d'),M=70,mir=$('stm').checked;
+ x.fillStyle='#fff';x.fillRect(0,0,W,H);x.textBaseline='alphabetic';x.fillStyle='#1E2530';x.font='bold 58px system-ui,sans-serif';x.fillText('Cartão do tatuador',M,115);
+ x.fillStyle='#6B7280';x.font='26px system-ui,sans-serif';x.fillText('Gerado no Estêncil · '+new Date().toLocaleDateString('pt-BR'),M,157);
+ var mk=compose(),bw=W-2*M,bh=800,sc=Math.min(bw/mk.width,bh/mk.height),mw=mk.width*sc,mh=mk.height*sc,mx=M+(bw-mw)/2;x.drawImage(mk,mx,190+(bh-mh)/2,mw,mh);x.strokeStyle='#D8DAE0';x.lineWidth=2;x.strokeRect(M,190,bw,bh);
+ var cw=o.sz*o.sx/100*cmPer,ch=o.sz*o.sy/100*cmPer*o.h/o.w,v=viab(o),y=1050,lab=function(t,val,col){x.fillStyle='#6B7280';x.font='bold 24px system-ui,sans-serif';x.fillText(t,M,y);x.fillStyle=col||'#1E2530';x.font='30px system-ui,sans-serif';y=wrapT(x,val,M,y+38,560,38)+16};
+ lab('TAMANHO',fc(cw)+' x '+fc(ch)+' cm (largura x altura)');
+ lab('POSIÇÃO',ref?posRel(o):'Marque um ponto de referência no app (aba Tamanho) para obter medidas a partir dele.');
+ if(Math.abs(o.r)>=1)lab('INCLINAÇÃO',Math.abs(Math.round(o.r))+'° no sentido '+(o.r>0?'horário':'anti-horário')+' em relação à posição reta');
+ lab('ESTÊNCIL',mir?'Espelhado (para papel de decalque)':'Normal');
+ lab('TINTA',o.kc?'Cores originais do desenho':o.co.toUpperCase());if(!o.kc){x.fillStyle=o.co;x.fillRect(M+260,y-80,60,34);x.strokeStyle='#D8DAE0';x.strokeRect(M+260,y-80,60,34)}
+ lab('VIABILIDADE',v.txt,v.lvl===2?'#C03030':v.lvl===1?'#A86400':'#1E2530');
+ var sb=document.createElement('canvas'),px=Math.max(200,Math.round(Math.min(480,480*o.w/Math.max(o.w,o.h*o.sy/o.sx))));
+ var st=flat(o,function(){return stencilCanvas(o,mir,px)}),k=Math.min(480/st.width,480/st.height);x.fillStyle='#fff';x.fillRect(690,1040,480,480);x.strokeStyle='#D8DAE0';x.strokeRect(690,1040,480,480);
+ x.drawImage(st,690+(480-st.width*k)/2,1040+(480-st.height*k)/2,st.width*k,st.height*k);x.fillStyle='#6B7280';x.font='22px system-ui,sans-serif';x.fillText('Estêncil em escala reduzida. O arquivo em tamanho real',690,1550);x.fillText('sai em "Exportar estêncil" (300 dpi).',690,1580);
+ x.fillStyle='#6B7280';x.font='22px system-ui,sans-serif';x.fillText('Medidas aproximadas, calibradas pela foto. Confirme no corpo antes de tatuar.',M,H-50);
+ showOv(c.toDataURL('image/png'),'cartao_tatuador.png','#fff',false)};
+// ---------- colagem das variações ----------
+$('bCol').onclick=function(){var ks=[0,1,2].filter(function(k){return V[k]});if(!ks.length||camS||!photo.naturalWidth){say('Grave pelo menos uma variação (A, B ou C) primeiro.');return}
+ say('Gerando colagem...');var cur=snap(),out=[],i=0;
+ (function nx(){if(i>=ks.length){restore(cur,done);return}var k=ks[i++];restore(V[k],function(){out.push(['Variação '+'ABC'[k],compose()]);nx()})})();
+ function done(){var n=out.length+1,cols=2,pw=700,ph=Math.round(pw*photo.naturalHeight/photo.naturalWidth),rows=Math.ceil(n/cols),g=24,lb=60,c=document.createElement('canvas');
+  c.width=cols*pw+(cols+1)*g;c.height=rows*(ph+lb)+(rows+1)*g;var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.font='bold 34px system-ui,sans-serif';x.fillStyle='#1E2530';x.textBaseline='middle';
+  [['Original',photo]].concat(out).forEach(function(it,j){var cx=g+(j%cols)*(pw+g),cy=g+Math.floor(j/cols)*(ph+lb+g);x.fillText(it[0],cx,cy+lb/2);x.drawImage(it[1],cx,cy+lb,pw,ph)});
+  showOv(c.toDataURL('image/jpeg',.9),'colagem.jpg','',false);say('')}};
+// ---------- câmera ----------
+var camS=null,camFace='user';
+function camStop(){if(camS){camS.getTracks().forEach(function(t){t.stop()});camS=null}$('cam').srcObject=null;$('cam').style.display='none';$('cb').style.display='none';photo.style.display=''}
+function camStart(){if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){say('A câmera não está disponível neste navegador.');return}
+ if(camS){camS.getTracks().forEach(function(t){t.stop()});camS=null}
+ navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:camFace},width:{ideal:1920},height:{ideal:1920}},audio:false}).then(function(s){camS=s;var v=$('cam');v.srcObject=s;v.style.transform=camFace==='user'?'scaleX(-1)':'';
+  v.onloadedmetadata=function(){fit()};var p=v.play();if(p&&p.catch)p.catch(function(){});
+  photo.style.display='none';v.style.display='block';stage.style.display='block';$('empty').style.display='none';$('zc').style.display='flex';$('cb').style.display='flex';vz=1;vx=vy=0;vap();fit();
+  say('Câmera ligada. Posicione-se e toque em Capturar.')}).catch(function(){say('Não consegui acessar a câmera. Permita o acesso nas configurações do navegador.')})}
+function camClose(){camStop();if(!photo.naturalWidth){stage.style.display='none';$('empty').style.display='';$('zc').style.display='none'}else fit()}
+function camShot(){var v=$('cam');if(!v.videoWidth)return;var s=Math.min(1,2000/Math.max(v.videoWidth,v.videoHeight)),c=document.createElement('canvas');c.width=Math.round(v.videoWidth*s);c.height=Math.round(v.videoHeight*s);var x=c.getContext('2d');
+ if(camFace==='user'){x.translate(c.width,0);x.scale(-1,1)}x.drawImage(v,0,0,c.width,c.height);var u=c.toDataURL('image/jpeg',.92);camStop();
+ setPhoto(u,function(){T.forEach(function(o){render(o)});auto();say('Foto capturada. A tatuagem continua no mesmo lugar.')})}
+$('bCam').onclick=camStart;$('bCam2').onclick=camStart;$('cbx').onclick=camClose;$('cbs').onclick=camShot;$('cbf').onclick=function(){camFace=camFace==='user'?'environment':'user';camStart()};
+// ---------- controles novos ----------
+$('wp').oninput=function(){if(sel){sel.wp=+$('wp').value;draw(sel);updMesh()}};$('wp').onchange=push;
+$('hl').oninput=function(){if(sel){sel.hl=+$('hl').value;draw(sel)}};$('hl').onchange=push;
+bind('th','th',1);bind('ot','ot',1);
+function setYr(v){curYr=v;T.forEach(function(o){o.yr=v;rr(o)});$('yr').value=v;$('yrl').textContent=yl(v)}
+$('yr').oninput=function(){setYr(+$('yr').value)};$('yr').onchange=push;
+document.querySelectorAll('.yb').forEach(function(b){b.onclick=function(){setYr(+b.dataset.y);push()}});
+$('bVi').onclick=function(){if(!sel)return;var v=viab(sel);$('vi').textContent=v.txt;$('vi').style.color=v.lvl===2?'#d14343':v.lvl===1?'#c77d00':'var(--mut)'};
+var tm;var hs=$('hint');new MutationObserver(function(){hs.classList.add('show');clearTimeout(tm);tm=setTimeout(function(){hs.classList.remove('show')},3500)}).observe(hs,{childList:true,characterData:true,subtree:true});
+if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(function(){});
+</script></body></html>
